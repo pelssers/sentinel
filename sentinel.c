@@ -1,8 +1,8 @@
-// Firmware for the Particle Electron microcontroller
+// Software for the Particle Electron
 // "sentinel" in the SUXESs lab.
 // Documentation on Particle: docs.particle.io
 //
-// This firmware enables the microcontroller to:
+// This software enables the Electron to:
 // -Check if it is running on external power or on battery
 // -Check if UPS power is on/available
 // -Read detector pressure (if UPS on)
@@ -26,7 +26,7 @@
 //                     UPS power state and pressure are also reported.
 //                     "Power OK/DOWN, UPS OK/DOWN, Pressure %.2f mbar".
 //
-// Bart Pelssers 24-11-2017
+// Bart Pelssers 20-03-2018
 
 // Access the Power Management IC
 PMIC pmic;
