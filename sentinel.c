@@ -26,7 +26,7 @@
 //                     UPS power state and pressure are also reported.
 //                     "Power OK/DOWN, UPS OK/DOWN, Pressure %.2f mbar".
 //
-// Bart Pelssers 20-03-2018
+// Bart Pelssers 2018
 
 // Access the Power Management IC
 PMIC pmic;
@@ -43,10 +43,13 @@ double pressure;
 
 // Internal variables
 bool is_armed;
-bool prev_power;
+bool prev_alarm_state;
+bool alarm_state;
+bool send_alarm;
 unsigned long now;
 unsigned long last_publish;
 unsigned long delta_t = 120000;  // Publish interval if power down [ms]
+double pressure_alarm_threshold = 2500.;  // Send alarm if above threshold in [mbar]
 
 int hasPower() {
     // Check if the unit has an external power source,
@@ -129,6 +132,7 @@ void setup() {  // Mandatory function, runs once when powering up
 
     // Armed by default
     is_armed = true;
+    alarm_state = false;
 
     // Starting time
     last_publish = 0;
@@ -142,18 +146,21 @@ void loop() {  // Mandatory function, loops forever
     has_ups_power = hasUPSPower();
 
     // Update power state
-    prev_power = has_power;
     has_power = hasPower();
 
     // Timestamp (milliseconds since powerup)
     now = millis();
 
-    // Check alarm condition
-    if (is_armed && ((prev_power != has_power) || ((now - last_publish) >= delta_t && !has_power))) {
-        // IF the device is armed AND
-        // 1) The power state has changed, OR
-        // 2) the power is down AND its been delta_t ms since last publish
-        // THEN publish alarm message
+    // Check alarm conditions
+    // Store previous alarm state
+    prev_alarm_state = alarm_state;
+    // Set current alarm state
+    alarm_state = !(has_power && has_ups_power && (pressure < pressure_alarm_threshold));
+    // Send alarm if the alarm state changed OR
+    // the alarm state is true AND its been delta_t ms since last publish
+    send_alarm = ((prev_alarm_state != alarm_state) || ((now - last_publish) >= delta_t && alarm_state));
+    if (is_armed && send_alarm) {
+        // Publish alarm message
         String message = String::format("Power %s, UPS %s, Pressure %.2f mbar",
                                         has_power ? "OK" : "DOWN",
                                         has_ups_power ? "OK" : "DOWN",
