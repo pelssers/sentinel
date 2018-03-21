@@ -21,6 +21,7 @@
 //            (int)0 is disarmed, (int)-1 if wrong argument.
 // - "led", takes a string "on" of "off" to turn on/off an LED, for
 //          future implementation of relais to switch LN2 cooling.
+// - "test", no arguments, publishes test event.
 //
 // The API events:
 // - "external_power", event is published every 2m if in alarm state
@@ -113,6 +114,17 @@ int alarmToggle(String command) {
     }
 }
 
+int testEvent(String command) {
+    // Publish test event
+    String message = "TEST: This is a test event";
+
+    Particle.publish("external_power",  // event name
+                     message,           // event data
+                     60,                // event TTL [s]
+                     PRIVATE);          // event scope
+    return 1;
+}
+
 void setup() {  // Mandatory function, runs once when powering up
     // Set pins
     pinMode(led, OUTPUT);
@@ -127,6 +139,7 @@ void setup() {  // Mandatory function, runs once when powering up
     // Declare Particle functions
     Particle.function("led", ledToggle);
     Particle.function("alarm", alarmToggle);
+    Particle.function("test", testEvent);
 
     // Set initial power state
     has_power = hasPower();
