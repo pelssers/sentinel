@@ -6,7 +6,9 @@
 // -Check if it is running on external power or on battery
 // -Check if UPS power is on/available
 // -Read detector pressure (if UPS on)
-// -Automatically send alarm messages if the external power fails.
+// -Automatically send alarm messages if either the
+//  external power or ups power fails. Or if the pressure
+//  exceeds a certain threshold.
 //
 // The API variables:
 // - "power" (integer) 0 or 1, the external power state.
@@ -21,9 +23,9 @@
 //          future implementation of relais to switch LN2 cooling.
 //
 // The API events:
-// - "external_power", event is published every 2m if external power
-//                     is off or the external power state changes.
-//                     UPS power state and pressure are also reported.
+// - "external_power", event is published every 2m if in alarm state
+//                     or if the alarm state changes.
+//                     Power, UPS power and pressure are reported.
 //                     "Power OK/DOWN, UPS OK/DOWN, Pressure %.2f mbar".
 //
 // Bart Pelssers 2018
