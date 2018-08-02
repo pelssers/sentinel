@@ -18,14 +18,13 @@
 // The API functions:
 // - "alarm", takes a string "arm" or "disarm" to enable/disable
 //            the sending of messages. returns (int)1 if armed,
-//            (int)0 is disarmed, (int)-1 if wrong argument.
+//            (int)0 if disarmed, (int)-1 if wrong argument.
 // - "led", takes a string "on" of "off" to turn on/off an LED, for
 //          future implementation of relais to switch LN2 cooling.
 // - "test", no arguments, publishes test event.
 //
 // The API events:
 // - "external_power", event is published every 2m if in alarm state
-//                     or if the alarm state changes.
 //                     Power, UPS power and pressure are reported.
 //                     "Power OK/DOWN, UPS OK/DOWN, Pressure %.2f mbar".
 //
@@ -46,7 +45,6 @@ double pressure;
 
 // Internal variables
 bool is_armed;
-bool prev_alarm_state;
 bool alarm_state;
 bool send_alarm;
 unsigned long now;
@@ -167,13 +165,10 @@ void loop() {  // Mandatory function, loops forever
     now = millis();
 
     // Check alarm conditions
-    // Store previous alarm state
-    prev_alarm_state = alarm_state;
     // Set current alarm state
     alarm_state = !(has_power && has_ups_power && (pressure < pressure_alarm_threshold));
-    // Send alarm if the alarm state changed OR
-    // the alarm state is true AND its been delta_t ms since last publish
-    send_alarm = ((prev_alarm_state != alarm_state) || ((now - last_publish) >= delta_t && alarm_state));
+    // Send alarm if the alarm state is true AND its been delta_t ms since last publish
+    send_alarm = ((now - last_publish) > delta_t && alarm_state);
     if (is_armed && send_alarm) {
         // Publish alarm message
         String message = String::format("Power %s, UPS %s, Pressure %.2f mbar",
