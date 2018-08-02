@@ -8,7 +8,7 @@
 // -Read detector pressure (if UPS on)
 // -Automatically send alarm messages if either the
 //  external power or ups power fails. Or if the pressure
-//  exceeds a certain threshold.
+//  exceeds a certain threshold (default 2500 mbar).
 //
 // The API variables:
 // - "power" (integer) 0 or 1, the external power state.
@@ -22,6 +22,10 @@
 // - "led", takes a string "on" of "off" to turn on/off an LED, for
 //          future implementation of relais to switch LN2 cooling.
 // - "test", no arguments, publishes test event.
+// - "threshold", takes a string to update the pressure alarm
+//                threshold. Returns (int)0 if conversion fails,
+//                returns (int)new_threshold otherwise.
+//                Example: "2500.0" to set 2500 mbar threshold.
 //
 // The API events:
 // - "external_power", event is published every 2m if in alarm state
@@ -112,6 +116,20 @@ int alarmToggle(String command) {
     }
 }
 
+int setPThresh(String command) {
+    // Set pressure threshold
+    // Attempt float conversion
+    double new_threshold = command.toFloat();
+    if (new_threshold == 0) {  // No valid conversion
+        return 0;
+    } else {
+        // Set new threshold
+        pressure_alarm_threshold = new_threshold;
+        // Return current threshold (as int)
+        return (int) pressure_alarm_threshold;
+    }
+}
+
 int testEvent(String command) {
     // Publish test event
     String message = "TEST: This is a test event";
@@ -138,6 +156,7 @@ void setup() {  // Mandatory function, runs once when powering up
     Particle.function("led", ledToggle);
     Particle.function("alarm", alarmToggle);
     Particle.function("test", testEvent);
+    Particle.function("threshold", setPThresh);
 
     // Set initial power state
     has_power = hasPower();
