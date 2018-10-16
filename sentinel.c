@@ -148,9 +148,9 @@ void setup() {  // Mandatory function, runs once when powering up
     pinMode(ups_power, INPUT);
 
     // Declare Particle variables, name max 12 char
-    Particle.variable("power", &has_power, INT);
-    Particle.variable("upspower", &has_ups_power, INT);
-    Particle.variable("pressure", &pressure, DOUBLE);
+    Particle.variable("power", has_power);
+    Particle.variable("upspower", has_ups_power);
+    Particle.variable("pressure", pressure);
 
     // Declare Particle functions
     Particle.function("led", ledToggle);
