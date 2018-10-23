@@ -14,6 +14,7 @@
 // - "power" (integer) 0 or 1, the external power state.
 // - "upspower" (integer) 0 or 1, the ups power state.
 // - "pressure" (double), the pressure in mbar.
+// - "status" (string), status message.
 //
 // The API functions:
 // - "alarm", takes a string "arm" or "disarm" to enable/disable
@@ -46,6 +47,7 @@ int ups_power = A3;  // Analog pin 3
 int has_power;  // no bool because of Particle.variable
 int has_ups_power;  // no bool because of Particle.variable
 double pressure;
+String status;
 
 // Internal variables
 bool is_armed;
@@ -148,9 +150,10 @@ void setup() {  // Mandatory function, runs once when powering up
     pinMode(ups_power, INPUT);
 
     // Declare Particle variables, name max 12 char
-    Particle.variable("power", &has_power, INT);
-    Particle.variable("upspower", &has_ups_power, INT);
-    Particle.variable("pressure", &pressure, DOUBLE);
+    Particle.variable("power", has_power);
+    Particle.variable("upspower", has_ups_power);
+    Particle.variable("pressure", pressure);
+    Particle.variable("status", status);
 
     // Declare Particle functions
     Particle.function("led", ledToggle);
@@ -166,8 +169,9 @@ void setup() {  // Mandatory function, runs once when powering up
     is_armed = true;
     alarm_state = false;
 
-    // Starting time
+    // Starting time and status
     last_publish = 0;
+    status = "setup";
 }
 
 void loop() {  // Mandatory function, loops forever
@@ -182,6 +186,14 @@ void loop() {  // Mandatory function, loops forever
 
     // Timestamp (milliseconds since powerup)
     now = millis();
+
+    // Update status message
+    status = String::format("power:%d,ups:%d,pressure:%.2f,pthresh:%d,armed:%d",
+                            has_power,
+                            has_ups_power,
+                            pressure,
+                            (int)pressure_alarm_threshold,
+                            (int)is_armed);
 
     // Check alarm conditions
     // Set current alarm state
