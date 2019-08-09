@@ -134,7 +134,7 @@ class Menu(object):
             while True:
                 print("")
                 self.menu()
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             print("\nDone")
 
     def string_print(self, k, v):
